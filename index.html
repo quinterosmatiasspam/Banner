@@ -1,78 +1,394 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Calculadora de Precio por m²</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .container {
-            background: #fff;
-            padding: 20px 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            width: 100%;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora m² — Pesos argentinos</title>
+
+  <!-- Google Font: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f1724;
+      --panel:#0b1320;
+      --muted:#9fb0c8;
+      --accent:#7c5cff;
+      --accent-2:#3be7b3;
+      --glass: rgba(255,255,255,0.03);
+      --radius:14px;
+      --gap:14px;
+      --max-width:520px;
+    }
+
+    /* Reset & base */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+      background: linear-gradient(180deg,#071029 0%, #071b2a 100%);
+      color:#eaf4ff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:var(--max-width);
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:calc(var(--radius) + 4px);
+      padding:18px;
+      box-shadow: 0 18px 50px rgba(2,8,30,0.7);
+      border:1px solid rgba(255,255,255,0.03);
+      overflow:hidden;
+    }
+
+    header.app-header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .logo{
+      width:52px;height:52px;border-radius:12px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow: 0 8px 26px rgba(124,92,255,0.14);
+      font-weight:700;color:white;font-size:1.1rem;
+    }
+    .brand{
+      line-height:1;
+    }
+    .brand h1{font-size:1.05rem;font-weight:700}
+    .brand p{font-size:0.82rem;color:var(--muted);margin-top:4px}
+
+    .kicker{
+      display:inline-block;
+      padding:6px 10px;border-radius:999px;
+      background: rgba(59,231,179,0.06);
+      color:var(--accent-2);
+      font-weight:700;font-size:0.78rem;
+    }
+
+    /* Form layout */
+    form.calc{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:8px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    label{
+      display:block;font-size:0.9rem;color:var(--muted);margin-bottom:6px;font-weight:600;
+    }
+
+    .field{
+      width:100%;
+      background:var(--glass);
+      border-radius:12px;
+      padding:8px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    .field input[type="number"]{
+      width:100%;
+      background:transparent;
+      border:0;
+      color:inherit;
+      font-size:1rem;
+      padding:10px 6px;
+      outline:none;
+      -moz-appearance:textfield;
+      -webkit-appearance:none;
+    }
+
+    /* remove number arrows on chrome */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .prefix{
+      font-weight:700;color:rgba(255,255,255,0.9);padding-left:6px;padding-right:6px;
+      font-size:0.95rem;
+      opacity:0.95;
+    }
+
+    .hint{font-size:0.82rem;color:var(--muted);margin-top:6px}
+
+    .controls{
+      display:flex;
+      gap:10px;
+      margin-top:6px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      flex:1;
+      padding:12px 14px;border-radius:12px;border:0;cursor:pointer;
+      font-weight:700;color:var(--bg);background:linear-gradient(90deg,var(--accent),#5b47ff);
+      box-shadow: 0 10px 26px rgba(124,92,255,0.12);
+      transition:transform .12s ease,opacity .12s ease;
+    }
+    .btn.secondary{background:transparent;color:var(--accent-2);border:1px solid rgba(59,231,179,0.08);box-shadow:none}
+    .btn:active{transform:translateY(1px)}
+    .btn:focus{outline:3px solid rgba(124,92,255,0.12);outline-offset:3px}
+
+    /* Results */
+    .results{
+      margin-top:14px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px;border-radius:12px;
+      background:linear-gradient(90deg, rgba(124,92,255,0.04), rgba(59,231,179,0.025));
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    .results .left{display:flex;flex-direction:column;gap:6px}
+    .results .label{font-size:0.82rem;color:var(--muted)}
+    .results .value{font-size:1.3rem;font-weight:800;letter-spacing:-0.01em}
+
+    .summary{
+      min-width:120px;
+      text-align:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:8px;border-radius:10px;
+      box-shadow: inset 0 -6px 12px rgba(0,0,0,0.15);
+    }
+    .summary .total{font-weight:800;font-size:1.05rem}
+
+    .error{
+      color:#ffb4b4;
+      background:rgba(255,180,180,0.04);
+      padding:8px 10px;border-radius:10px;font-size:0.9rem;
+      border:1px solid rgba(255,180,180,0.06);
+    }
+
+    /* decorative footer */
+    footer.app-footer{margin-top:12px;color:var(--muted);font-size:0.85rem;text-align:center}
+
+    /* responsive */
+    @media(min-width:720px){
+      .card{padding:22px}
+      .wrap{padding:6px}
+      .results .left{gap:4px}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Calcula el precio por m²</h2>
-        <label for="width">Ancho (m):</label>
-        <input type="number" id="width" min="0" step="any">
-        <label for="height">Alto (m):</label>
-        <input type="number" id="height" min="0" step="any">
-        <label for="price">Precio por m²:</label>
-        <input type="number" id="price" min="0" step="any">
-        <button id="calculateBtn">Calcular</button>
-        <div class="result" id="result"></div>
-    </div>
-    <script>
-        document.getElementById('calculateBtn').addEventListener('click', function() {
-            const width = parseFloat(document.getElementById('width').value) || 0;
-            const height = parseFloat(document.getElementById('height').value) || 0;
-            const pricePerM2 = parseFloat(document.getElementById('price').value) || 0;
-            const area = width * height;
-            const total = area * pricePerM2;
-            const resultEl = document.getElementById('result');
-            resultEl.textContent = `Área: ${area.toFixed(2)} m² - Precio total: $${total.toFixed(2)}`;
-        });
-    </script>
+  <div class="wrap">
+    <main class="card" role="main" aria-labelledby="title">
+      <header class="app-header">
+        <div class="logo" aria-hidden="true">B</div>
+        <div class="brand">
+          <h1 id="title">Calculadora m²</h1>
+          <p>Precio en pesos argentinos — P. P/ m²</p>
+        </div>
+      </header>
+
+      <span class="kicker" aria-hidden="true">Mobile‑first · Simple</span>
+
+      <form class="calc" id="calcForm" onsubmit="return false;" autocomplete="off" aria-describedby="hint">
+        <!-- Width & Height -->
+        <div>
+          <label for="width">Ancho (m)</label>
+          <div class="field">
+            <input id="width" name="width" type="number" inputmode="decimal" step="0.01" min="0" placeholder="p. ej. 2.50" aria-label="Ancho en metros">
+            <div class="prefix" aria-hidden="true">m</div>
+          </div>
+        </div>
+
+        <div>
+          <label for="height">Alto (m)</label>
+          <div class="field">
+            <input id="height" name="height" type="number" inputmode="decimal" step="0.01" min="0" placeholder="p. ej. 1.80" aria-label="Alto en metros">
+            <div class="prefix" aria-hidden="true">m</div>
+          </div>
+        </div>
+
+        <div>
+          <label for="price">Precio por m² (ARS)</label>
+          <div class="field">
+            <div class="prefix" aria-hidden="true">$</div>
+            <input id="price" name="price" type="number" inputmode="decimal" step="0.01" min="0" placeholder="p. ej. 2500" aria-label="Precio por metro cuadrado en pesos">
+          </div>
+        </div>
+
+        <div class="controls" role="group" aria-label="Acciones">
+          <button id="calcBtn" class="btn" type="button">Calcular</button>
+          <button id="clearBtn" class="btn secondary" type="button">Limpiar</button>
+        </div>
+
+        <div id="hint" class="hint">Acepta decimales. Usa coma o punto como separador (ej.: 2,5 o 2.5). Resultado en pesos argentinos ($).</div>
+      </form>
+
+      <div id="error" class="error" style="display:none;margin-top:10px" role="alert" aria-live="assertive"></div>
+
+      <section class="results" aria-live="polite" aria-atomic="true">
+        <div class="left">
+          <div class="label">Área</div>
+          <div id="area" class="value">0,00 m²</div>
+          <div id="perM2" class="label">Precio por m²: $ —</div>
+        </div>
+
+        <div class="summary" aria-hidden="true" id="summary">
+          <div class="label" style="font-size:0.82rem;color:var(--muted)">Total</div>
+          <div id="total" class="total">$ —</div>
+        </div>
+      </section>
+
+      <footer class="app-footer">Diseñado para abrir directo desde tu repositorio · Poppins</footer>
+    </main>
+  </div>
+
+  <script>
+    // Helper: parse numbers accepting comma or dot, return NaN for invalid
+    function parseNumber(val){
+      if (val === null || val === undefined) return NaN;
+      const s = String(val).trim().replace(',', '.');
+      if (s === '') return NaN;
+      const n = Number(s);
+      return isFinite(n) ? n : NaN;
+    }
+
+    // Format area with 2 decimals and decimal comma (es-AR)
+    function formatArea(n){
+      if (!isFinite(n)) return '—';
+      return n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' m²';
+    }
+
+    // Format money in ARS
+    function formatARS(n){
+      if (!isFinite(n)) return '$ —';
+      // Use currency ARS and locale es-AR
+      try {
+        return n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } catch (e) {
+        // Fallback
+        return '$ ' + n.toFixed(2);
+      }
+    }
+
+    // Elements
+    const widthEl = document.getElementById('width');
+    const heightEl = document.getElementById('height');
+    const priceEl = document.getElementById('price');
+    const calcBtn = document.getElementById('calcBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const areaEl = document.getElementById('area');
+    const perM2El = document.getElementById('perM2');
+    const totalEl = document.getElementById('total');
+    const summaryEl = document.getElementById('summary');
+    const errorEl = document.getElementById('error');
+
+    // Validate inputs and compute
+    function compute(showError = true){
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+      summaryEl.setAttribute('aria-hidden','true');
+
+      const w = parseNumber(widthEl.value);
+      const h = parseNumber(heightEl.value);
+      const p = parseNumber(priceEl.value);
+
+      // Basic validation
+      if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+        areaEl.textContent = '—';
+        perM2El.textContent = 'Precio por m²: $ —';
+        totalEl.textContent = '$ —';
+        if (showError) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = 'Ingresa ancho y alto válidos (mayores a 0).';
+        }
+        return null;
+      }
+
+      const area = w * h;
+      areaEl.textContent = formatArea(area);
+
+      if (isNaN(p) || p < 0) {
+        perM2El.textContent = 'Precio por m²: $ —';
+        totalEl.textContent = '$ —';
+        if (showError) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = 'Ingresa un precio por m² válido (0 o mayor).';
+        }
+        return { area };
+      }
+
+      perM2El.textContent = 'Precio por m²: ' + formatARS(p);
+
+      const total = area * p;
+      totalEl.textContent = formatARS(total);
+      summaryEl.setAttribute('aria-hidden','false');
+
+      // subtle highlight animation
+      summaryEl.animate([
+        { transform: 'translateY(8px)', opacity: 0.6 },
+        { transform: 'translateY(0)', opacity: 1 }
+      ], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)' });
+
+      return { area, total };
+    }
+
+    // Clear
+    function clearAll(){
+      widthEl.value = '';
+      heightEl.value = '';
+      priceEl.value = '';
+      areaEl.textContent = '0,00 m²';
+      perM2El.textContent = 'Precio por m²: $ —';
+      totalEl.textContent = '$ —';
+      errorEl.style.display = 'none';
+      summaryEl.setAttribute('aria-hidden','true');
+      widthEl.focus();
+    }
+
+    // Events
+    calcBtn.addEventListener('click', () => compute(true));
+    clearBtn.addEventListener('click', clearAll);
+
+    // Enter key calculates
+    [widthEl, heightEl, priceEl].forEach(el => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          compute(true);
+        }
+      });
+    });
+
+    // Live small debounce calculate for better UX
+    let timer = null;
+    function liveCalc(){
+      clearTimeout(timer);
+      timer = setTimeout(() => compute(false), 300);
+    }
+    widthEl.addEventListener('input', liveCalc);
+    heightEl.addEventListener('input', liveCalc);
+    priceEl.addEventListener('input', liveCalc);
+
+    // Initialize
+    clearAll();
+  </script>
 </body>
 </html>
