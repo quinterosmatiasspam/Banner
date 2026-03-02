@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Precio por m²</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calcula el precio por m²</h2>
+        <label for="width">Ancho (m):</label>
+        <input type="number" id="width" min="0" step="any">
+        <label for="height">Alto (m):</label>
+        <input type="number" id="height" min="0" step="any">
+        <label for="price">Precio por m²:</label>
+        <input type="number" id="price" min="0" step="any">
+        <button id="calculateBtn">Calcular</button>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const pricePerM2 = parseFloat(document.getElementById('price').value) || 0;
+            const area = width * height;
+            const total = area * pricePerM2;
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = `Área: ${area.toFixed(2)} m² - Precio total: $${total.toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>
